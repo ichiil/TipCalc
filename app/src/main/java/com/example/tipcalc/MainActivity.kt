@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -70,6 +71,12 @@ fun calcDishDiscountPercent(dishes: Int): Int {
 
 fun calcDiscountAmount(sum: Double, discountPercent: Int): Double {
     return sum * discountPercent / 100.0
+}
+
+fun calcFinalTotal(sum: Double, discountPercent: Int, tipPercent: Int): Double {
+    val discount = calcDiscountAmount(sum, discountPercent)
+    val tip = calcTipAmount(sum, tipPercent)
+    return sum - discount + tip
 }
 
 @Composable
@@ -162,6 +169,17 @@ fun TipScreen(){
             readOnly = true,
             label = { Text("Сумма скидки / Итог") }
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+        Button(
+            onClick = {
+                val final = calcFinalTotal(sum, selectedDiscountPercent, sliderValue.toInt())
+                displayField = String.format("Итог: %.2f", final)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Итого")
+        }
 
     }
 
