@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +68,9 @@ fun calcDishDiscountPercent(dishes: Int): Int {
     }
 }
 
+fun calcDiscountAmount(sum: Double, discountPercent: Int): Double {
+    return sum * discountPercent / 100.0
+}
 
 @Composable
 fun DiscountRadioDisplay(percent: Int, selected: Boolean) {
@@ -142,7 +146,22 @@ fun TipScreen(){
             DiscountRadioDisplay(percent = 10, selected = discountPercentByDishes == 10)
         }
 
-
+        Spacer(modifier = Modifier.height(16.dp))
+        var displayField by remember { mutableStateOf("") }
+        val sum = sumText.replace(',', '.').toDoubleOrNull() ?: 0.0
+        val selectedDiscountPercent = discountPercentByDishes
+        val discountAmount = calcDiscountAmount(sum, selectedDiscountPercent)
+        val tipAmount = calcTipAmount(sum, sliderValue.toInt())
+        LaunchedEffect(sum, selectedDiscountPercent) {
+            displayField = String.format("Скидка: %.2f", discountAmount)
+        }
+        OutlinedTextField(
+            value = displayField,
+            onValueChange = {  },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            label = { Text("Сумма скидки / Итог") }
+        )
 
     }
 
