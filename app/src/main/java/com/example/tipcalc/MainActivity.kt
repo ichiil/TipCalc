@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,17 +15,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tipcalc.ui.theme.TipCalcTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +52,10 @@ fun TipCalculatorApp() {
     }
 }
 
+fun calcTipAmount(sum: Double, tipPercente: Int): Double {
+    return sum * tipPercente / 100.0
+}
+
 @Composable
 fun TipScreen(){
     var sumText by remember { mutableStateOf("") }
@@ -63,7 +74,6 @@ fun TipScreen(){
         )
 
         Spacer(modifier = Modifier.height(12.dp))
-
         Text(text = "Количество блюд:")
         OutlinedTextField(
             value = dishesText,
@@ -71,6 +81,35 @@ fun TipScreen(){
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Чаевые:")
+        var sliderValue by remember { mutableStateOf(0f) } // 0..25
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("0")
+            Text("25")
+        }
+        Slider(
+            value = sliderValue,
+            onValueChange = {
+                sliderValue = it
+                val sum = sumText.replace(',', '.').toDoubleOrNull() ?: 0.0
+                val tip = calcTipAmount(sum, sliderValue.toInt())
+                // показываем Snackbar
+                scope.launch {
+                    snackbarHostState.showSnackbar("Чаевые: ${String.format("%.2f", tip)}")
+                    }
+                },
+                valueRange = 0f..25f,
+                steps = 4, // 5 шагов: 0,5,10,15,20,25 -> steps = (25/5)-1 = 4
+                modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                SnackbarHost(hostState = snackbarHostState)
+
     }
 
 }
