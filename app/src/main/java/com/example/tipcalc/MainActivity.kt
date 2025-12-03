@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
@@ -56,6 +57,26 @@ fun calcTipAmount(sum: Double, tipPercente: Int): Double {
     return sum * tipPercente / 100.0
 }
 
+fun calcDishDiscountPercent(dishes: Int): Int {
+    return when (dishes) {
+        in 1..2 -> 3
+        in 3..5 -> 5
+        in 6..10 -> 7
+        in 11..Int.MAX_VALUE -> 10
+        else -> 0
+    }
+}
+
+
+@Composable
+fun DiscountRadioDisplay(percent: Int, selected: Boolean) {
+    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+        RadioButton(selected = selected, onClick = null, enabled = false)
+        Text(text = "$percent%")
+    }
+}
+
+
 @Composable
 fun TipScreen(){
     var sumText by remember { mutableStateOf("") }
@@ -64,7 +85,6 @@ fun TipScreen(){
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)) {
-
         Text(text = "Сумма заказа:")
         OutlinedTextField(
             value = sumText,
@@ -72,7 +92,6 @@ fun TipScreen(){
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
-
         Spacer(modifier = Modifier.height(12.dp))
         Text(text = "Количество блюд:")
         OutlinedTextField(
@@ -109,6 +128,21 @@ fun TipScreen(){
 
                 Spacer(modifier = Modifier.height(8.dp))
                 SnackbarHost(hostState = snackbarHostState)
+
+
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "Скидка:")
+        val dishes = dishesText.toIntOrNull() ?: 0
+        val discountPercentByDishes = calcDishDiscountPercent(dishes)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            DiscountRadioDisplay(percent = 3, selected = discountPercentByDishes == 3)
+            DiscountRadioDisplay(percent = 5, selected = discountPercentByDishes == 5)
+            DiscountRadioDisplay(percent = 7, selected = discountPercentByDishes == 7)
+            DiscountRadioDisplay(percent = 10, selected = discountPercentByDishes == 10)
+        }
+
+
 
     }
 
